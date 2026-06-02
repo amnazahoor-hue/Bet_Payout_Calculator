@@ -31,6 +31,9 @@ yarn-error.log*
 
 # unused / oversized local asset (GitHub limit 100MB per file)
 /public/images/horse-sprite-2.mp4
+/public/images/horse-sprite-full.mp4
+/public/images/horse-sprite-3-full.mp4
+.tmp-frames/
 
 # typescript
 *.tsbuildinfo

@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { heroVideoSrc } from "@/lib/site";
+
+const HERO_PLAYBACK_RATE = 1;
+const LOOP_EPSILON = 0.1;
 
 function HorseSpriteFallback() {
   return (
@@ -14,11 +17,55 @@ function HorseSpriteFallback() {
 }
 
 export default function HorseAnimation() {
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [videoError, setVideoError] = useState(false);
 
   const scrollToTool = () => {
     document.getElementById("tool")?.scrollIntoView({ behavior: "smooth" });
   };
+
+  const applyPlayback = useCallback((video: HTMLVideoElement) => {
+    video.playbackRate = HERO_PLAYBACK_RATE;
+    video.defaultPlaybackRate = HERO_PLAYBACK_RATE;
+    void video.play().catch(() => {});
+  }, []);
+
+  const seekToLoopStart = useCallback((video: HTMLVideoElement) => {
+    if (video.readyState >= 1) {
+      video.currentTime = 0.001;
+    }
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || videoError) return;
+
+    applyPlayback(video);
+
+    const onLoaded = () => applyPlayback(video);
+
+    const onTimeUpdate = () => {
+      if (!Number.isFinite(video.duration) || video.duration <= 0) return;
+      if (video.currentTime >= video.duration - LOOP_EPSILON) {
+        seekToLoopStart(video);
+      }
+    };
+
+    const onEnded = () => {
+      seekToLoopStart(video);
+      applyPlayback(video);
+    };
+
+    video.addEventListener("loadeddata", onLoaded);
+    video.addEventListener("timeupdate", onTimeUpdate);
+    video.addEventListener("ended", onEnded);
+
+    return () => {
+      video.removeEventListener("loadeddata", onLoaded);
+      video.removeEventListener("timeupdate", onTimeUpdate);
+      video.removeEventListener("ended", onEnded);
+    };
+  }, [videoError, applyPlayback, seekToLoopStart]);
 
   return (
     <div className="hero-media-stack">
@@ -43,8 +90,9 @@ export default function HorseAnimation() {
         {!videoError ? (
           <>
             <video
+              ref={videoRef}
+              className="hero-video-element"
               autoPlay
-              loop
               muted
               playsInline
               controls={false}

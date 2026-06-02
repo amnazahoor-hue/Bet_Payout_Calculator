@@ -32,7 +32,13 @@ export default function FAQSection() {
         <Reveal variant="scale">
           <div className="faq-stage">
             <div className="faq-stage-bg" aria-hidden="true">
-              <LazyVideo src={faqVideoSrc} className="faq-stage-bg-video" preload="metadata" />
+              <LazyVideo
+                src={faqVideoSrc}
+                className="faq-stage-bg-video"
+                preload="auto"
+                playbackRate={1}
+                seamlessLoop
+              />
               <div className="faq-stage-gradient" />
             </div>
 
