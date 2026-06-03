@@ -3690,6 +3690,8 @@ video::-webkit-media-controls-panel {
     order: 1;
     max-width: 100%;
     padding: 28px 20px 32px;
+    position: relative;
+    z-index: 2;
   }
 
   .faq-card {
