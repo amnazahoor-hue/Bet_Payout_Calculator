@@ -5,8 +5,9 @@ import { motion } from "framer-motion";
 import Reveal from "@/components/ui/Reveal";
 import { fadeUp, hoverLift, revealTransition, scrollViewport, tapPress } from "@/lib/motion";
 
-const HOW_IT_WORKS_IMAGE =
-  "https://images.unsplash.com/photo-1593179449458-e0d43d512551?w=800&h=1000&auto=format&fit=crop&q=75";
+import { howItWorksImageSrc } from "@/lib/site";
+
+const HOW_IT_WORKS_IMAGE = howItWorksImageSrc;
 
 const steps = [
   {
@@ -84,8 +85,8 @@ export default function HowItWorksSection() {
               width={800}
               height={1000}
               sizes="(max-width: 1024px) 100vw, (max-width: 1200px) 40vw, 480px"
-              quality={75}
-              loading="lazy"
+              quality={80}
+              priority
               className="how-it-works-stage-img"
             />
             <div className="how-it-works-stage-visual-overlay" />

@@ -3,13 +3,15 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Reveal from "@/components/ui/Reveal";
-import LazyVideo from "@/components/ui/LazyVideo";
+import ResponsiveVideo from "@/components/ui/ResponsiveVideo";
 import { fadeUp, revealTransition, scrollViewport } from "@/lib/motion";
-import { faqVideoSrc } from "@/lib/site";
+import { faqVideoSrc, faqVideoSrcMobile } from "@/lib/site";
+import { useIsMobileViewport } from "@/lib/use-mobile-media";
 import { faqItems } from "@/data/faq";
 
 export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const isMobile = useIsMobileViewport();
 
   const toggle = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -29,15 +31,13 @@ export default function FAQSection() {
           Frequently Asked Questions
         </motion.h2>
 
-        <Reveal variant="scale">
+        <Reveal variant={isMobile ? "fadeIn" : "scale"}>
           <div className="faq-stage">
             <div className="faq-stage-bg" aria-hidden="true">
-              <LazyVideo
-                src={faqVideoSrc}
+              <ResponsiveVideo
+                desktopSrc={faqVideoSrc}
+                mobileSrc={faqVideoSrcMobile}
                 className="faq-stage-bg-video"
-                preload="auto"
-                playbackRate={1}
-                seamlessLoop
               />
               <div className="faq-stage-gradient" />
             </div>
@@ -49,12 +49,11 @@ export default function FAQSection() {
                   return (
                     <motion.div
                       key={item.question}
-                      variants={fadeUp}
-                      initial="hidden"
-                      whileInView="visible"
+                      variants={isMobile ? undefined : fadeUp}
+                      initial={isMobile ? false : "hidden"}
+                      whileInView={isMobile ? undefined : "visible"}
                       viewport={scrollViewport}
-                      transition={revealTransition(index * 0.06)}
-                      whileHover={{ x: 0 }}
+                      transition={isMobile ? undefined : revealTransition(index * 0.06)}
                       className={`faq-card ${isOpen ? "faq-card-open" : ""}`}
                     >
                       <button
@@ -68,7 +67,7 @@ export default function FAQSection() {
                         </span>
                         <motion.span
                           animate={{ rotate: isOpen ? 180 : 0 }}
-                          transition={{ duration: 0.25 }}
+                          transition={{ duration: 0.2 }}
                           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-section-alt text-primary"
                           aria-hidden="true"
                         >
@@ -81,7 +80,7 @@ export default function FAQSection() {
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.25 }}
+                            transition={{ duration: 0.2 }}
                             className="overflow-hidden"
                           >
                             <p className="px-5 pb-5 text-sm leading-relaxed text-text-secondary md:text-base">

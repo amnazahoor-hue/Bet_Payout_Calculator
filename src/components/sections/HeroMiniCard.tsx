@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { formatEnglishCurrency, formatEnglishNumber } from "@/lib/calculator";
 
 const examplePool = 5_000_000;
@@ -13,12 +12,7 @@ export default function HeroMiniCard() {
   };
 
   return (
-    <motion.div
-      className="hero-mini-card"
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.85, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-    >
+    <div className="hero-mini-card">
       <div className="hero-mini-card-inner">
         <div className="hero-mini-card-left">
           <h2 className="hero-mini-card-title">Quick Calculation</h2>
@@ -47,6 +41,6 @@ export default function HeroMiniCard() {
           </span>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

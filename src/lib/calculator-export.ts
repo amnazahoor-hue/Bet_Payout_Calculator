@@ -13,6 +13,27 @@ const BRAND = {
 
 const PDF_BRAND_NAME = "AltiliBahis";
 
+const PDF_TOOL_DETAILS = {
+  name: "Six-Fold Bet Payout Calculator",
+  tagline: "TJK-Compatible Payout Estimator",
+  summary:
+    "Free online tool for Turkish Jockey Club (TJK) altılı bets. Enter the total prize pool and number of winning tickets to receive an instant per-ticket payout estimate.",
+  formula: "Prize Pool / Winning Tickets = Payout per ticket",
+  points: [
+    "Covers six-fold (altılı) horse racing bets with equal pool division",
+    "Results are estimates for planning — not official TJK announcements",
+    "Generated at altilibahis.com — no account or payment required",
+  ],
+  disclaimer:
+    "Unofficial estimate only. This PDF is not a TJK certificate, legal document, or guarantee of payout. Confirm final amounts with official TJK sources.",
+} as const;
+
+function createDocumentReference(): string {
+  const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const suffix = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `AB-${stamp}-${suffix}`;
+}
+
 export function toPdfSafeText(input: string): string {
   return input
     .replace(/₺/g, "TL ")
@@ -116,13 +137,77 @@ function pdfText(
   doc.text(safe, x, y, options?.align ? { align: options.align } : undefined);
 }
 
+function drawOfficialFooter(doc: JsPDFInstance, pageW: number, pageH: number, margin: number) {
+  const footerH = 58;
+  const footerY = pageH - footerH;
+  const contentW = pageW - margin * 2;
+  const rightColW = 52;
+
+  doc.setFillColor(...BRAND.heroBg);
+  doc.rect(0, footerY, pageW, footerH, "F");
+  doc.setFillColor(...BRAND.gold);
+  doc.rect(0, footerY, pageW, 1.5, "F");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(...BRAND.goldBright);
+  pdfText(doc, `${PDF_BRAND_NAME} — ${PDF_TOOL_DETAILS.name}`, margin, footerY + 7);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.setTextColor(...BRAND.cream);
+  const summaryLines = doc.splitTextToSize(toPdfSafeText(PDF_TOOL_DETAILS.summary), contentW - rightColW);
+  doc.text(summaryLines, margin, footerY + 13);
+
+  let leftY = footerY + 13 + summaryLines.length * 3.5 + 2;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7);
+  doc.setTextColor(...BRAND.goldBright);
+  pdfText(doc, `Formula: ${PDF_TOOL_DETAILS.formula}`, margin, leftY);
+  leftY += 5;
+
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...BRAND.cream);
+  for (const point of PDF_TOOL_DETAILS.points) {
+    const lines = doc.splitTextToSize(toPdfSafeText(`- ${point}`), contentW - rightColW);
+    doc.text(lines, margin, leftY);
+    leftY += lines.length * 3.5 + 1;
+  }
+
+  doc.setFontSize(6.5);
+  doc.setTextColor(...BRAND.goldBright);
+  const disclaimerLines = doc.splitTextToSize(toPdfSafeText(PDF_TOOL_DETAILS.disclaimer), contentW - 4);
+  doc.text(disclaimerLines, margin, Math.min(leftY + 1, footerY + footerH - 6));
+
+  const siteLabel = toPdfSafeText(siteConfig.url.replace(/^https?:\/\//, ""));
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7);
+  doc.setTextColor(...BRAND.cream);
+  pdfText(doc, siteLabel, pageW - margin, footerY + 8, { align: "right" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(6.5);
+  pdfText(doc, PDF_TOOL_DETAILS.tagline, pageW - margin, footerY + 13, { align: "right" });
+  pdfText(
+    doc,
+    `(c) ${new Date().getFullYear()} ${PDF_BRAND_NAME}. All rights reserved.`,
+    pageW - margin,
+    footerY + 18,
+    { align: "right" }
+  );
+  pdfText(doc, "OFFICIAL ESTIMATE DOCUMENT", pageW - margin, footerY + 24, { align: "right" });
+}
+
 export async function downloadPayoutPdf(payload: ExportPayload): Promise<void> {
   const { jsPDF } = await import("jspdf");
   const { prizePoolDisplay, winnersDisplay, result } = payload;
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
   const contentW = pageW - 36;
   const margin = 18;
+  const footerReserve = 64;
+  const documentRef = createDocumentReference();
   let y = 0;
 
   const poolLabel = formatPdfCurrency(prizePoolDisplay);
@@ -150,6 +235,24 @@ export async function downloadPayoutPdf(payload: ExportPayload): Promise<void> {
   doc.setFontSize(9);
   doc.setTextColor(...BRAND.goldBright);
   pdfText(doc, "Official Payout Estimate Document", headerTextX, 30);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7);
+  doc.setTextColor(...BRAND.cream);
+  pdfText(doc, "DOCUMENT NO.", pageW - margin, 14, { align: "right" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...BRAND.goldBright);
+  pdfText(doc, documentRef, pageW - margin, 20, { align: "right" });
+  doc.setFontSize(7);
+  doc.setTextColor(...BRAND.cream);
+  pdfText(doc, "STATUS: OFFICIAL ESTIMATE", pageW - margin, 26, { align: "right" });
+
+  doc.setDrawColor(...BRAND.gold);
+  doc.setLineWidth(0.35);
+  doc.roundedRect(margin - 2, 46, contentW + 4, pageH - footerReserve - 48, 2, 2, "S");
+  doc.setLineWidth(0.15);
+  doc.roundedRect(margin - 3.5, 44.5, contentW + 7, pageH - footerReserve - 45, 2, 2, "S");
 
   y = 54;
   doc.setFillColor(...BRAND.cream);
@@ -224,14 +327,23 @@ export async function downloadPayoutPdf(payload: ExportPayload): Promise<void> {
 
   y += 52;
 
-  doc.setFillColor(...BRAND.gold);
-  doc.rect(0, doc.internal.pageSize.getHeight() - 8, pageW, 8, "F");
-  doc.setFontSize(8);
-  doc.setTextColor(...BRAND.heroBg);
-  pdfText(doc, "altilibahis.com - TJK-Compatible Estimate", pageW / 2, doc.internal.pageSize.getHeight() - 3, {
-    align: "center",
-  });
+  if (y < pageH - footerReserve - 14) {
+    doc.setDrawColor(...BRAND.gold);
+    doc.setLineWidth(0.25);
+    doc.line(margin, y + 2, margin + contentW, y + 2);
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(8);
+    doc.setTextColor(...BRAND.muted);
+    pdfText(
+      doc,
+      "This official estimate document was generated electronically and is valid for reference purposes only.",
+      margin,
+      y + 8,
+      { maxWidth: contentW }
+    );
+  }
 
-  const dateSlug = new Date().toISOString().slice(0, 10);
-  doc.save(`altilibahis-payout-estimate-${dateSlug}.pdf`);
+  drawOfficialFooter(doc, pageW, pageH, margin);
+
+  doc.save(`altilibahis-official-payout-${documentRef.toLowerCase()}.pdf`);
 }

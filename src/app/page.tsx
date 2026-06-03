@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import HeroSection from "@/components/sections/HeroSection";
 import ToolSection from "@/components/sections/ToolSection";
+import HowItWorksSection from "@/components/sections/HowItWorksSection";
+import ToolDetailSection from "@/components/sections/ToolDetailSection";
+import FAQSection from "@/components/sections/FAQSection";
 import {
   getBreadcrumbSchema,
   getFaqSchema,
@@ -12,20 +14,6 @@ import {
   jsonLd,
 } from "@/lib/seo-schemas";
 import { siteConfig } from "@/lib/site";
-
-const HowItWorksSection = dynamic(
-  () => import("@/components/sections/HowItWorksSection"),
-  { loading: () => <div className="min-h-[400px]" aria-hidden="true" /> }
-);
-
-const ToolDetailSection = dynamic(
-  () => import("@/components/sections/ToolDetailSection"),
-  { loading: () => <div className="min-h-[400px]" aria-hidden="true" /> }
-);
-
-const FAQSection = dynamic(() => import("@/components/sections/FAQSection"), {
-  loading: () => <div className="min-h-[400px]" aria-hidden="true" />,
-});
 
 export const metadata: Metadata = {
   title: "Six-Fold Bet Calculator | TJK Payout Estimator",

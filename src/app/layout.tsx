@@ -1,29 +1,32 @@
 import type { Metadata } from "next";
-import { Playfair_Display, DM_Sans, JetBrains_Mono } from "next/font/google";
+import { Playfair_Display, DM_Sans } from "next/font/google";
 import Script from "next/script";
 import MotionProvider from "@/components/providers/MotionProvider";
-import { defaultMetadata, heroVideoSrc } from "@/lib/site";
+import {
+  calculatorImageSrc,
+  defaultMetadata,
+  faqVideoSrc,
+  faqVideoSrcMobile,
+  heroVideoSrc,
+  heroVideoSrcMobile,
+  howItWorksImageSrc,
+} from "@/lib/site";
 import "./globals.css";
 
 const playfair = Playfair_Display({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "700"],
+  subsets: ["latin"],
+  weight: ["700"],
   variable: "--font-playfair",
   display: "swap",
+  preload: true,
 });
 
 const dmSans = DM_Sans({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
   variable: "--font-dm-sans",
   display: "swap",
-});
-
-const jetbrains = JetBrains_Mono({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "700"],
-  variable: "--font-jetbrains",
-  display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = defaultMetadata;
@@ -39,11 +42,38 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="preload" href={heroVideoSrc} as="video" type="video/mp4" />
+        <link
+          rel="preload"
+          href={heroVideoSrc}
+          as="video"
+          type="video/mp4"
+          media="(min-width: 768px)"
+        />
+        <link
+          rel="preload"
+          href={heroVideoSrcMobile}
+          as="video"
+          type="video/mp4"
+          media="(max-width: 767px)"
+        />
+        <link
+          rel="prefetch"
+          href={faqVideoSrc}
+          as="video"
+          type="video/mp4"
+          media="(min-width: 768px)"
+        />
+        <link
+          rel="prefetch"
+          href={faqVideoSrcMobile}
+          as="video"
+          type="video/mp4"
+          media="(max-width: 767px)"
+        />
+        <link rel="preload" href={calculatorImageSrc} as="image" type="image/jpeg" />
+        <link rel="preload" href={howItWorksImageSrc} as="image" type="image/jpeg" />
       </head>
-      <body
-        className={`${playfair.variable} ${dmSans.variable} ${jetbrains.variable} font-sans antialiased`}
-      >
+      <body className={`${playfair.variable} ${dmSans.variable} font-sans antialiased`}>
         <MotionProvider>{children}</MotionProvider>
         {gaId ? (
           <>

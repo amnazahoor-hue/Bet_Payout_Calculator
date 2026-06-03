@@ -1,8 +1,4 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Logo from "@/components/ui/Logo";
-import { fadeUp, revealTransition, scrollViewport } from "@/lib/motion";
 
 const quickLinks = [
   { href: "/", label: "Home" },
@@ -21,13 +17,6 @@ const legalLinks = [
 
 const FOOTER_DISCLAIMER =
   "Estimates only — not an official TJK payout certificate.";
-
-const footerStagger = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.08, delayChildren: 0.05 },
-  },
-};
 
 type SocialVariant = "facebook" | "x" | "instagram" | "youtube";
 
@@ -104,14 +93,8 @@ export default function Footer() {
       <div className="site-footer-pattern" aria-hidden="true" />
 
       <div className="site-footer-outer">
-        <motion.div
-          className="site-footer-grid"
-          variants={footerStagger}
-          initial="hidden"
-          whileInView="visible"
-          viewport={scrollViewport}
-        >
-          <motion.div className="site-footer-brand" variants={fadeUp} transition={revealTransition(0)}>
+        <div className="site-footer-grid">
+          <div className="site-footer-brand">
             <Logo variant="light" className="site-footer-logo" />
             <p className="site-footer-desc">
               Calculate TJK six-fold bet payouts quickly and for free. Enter the pool and winner
@@ -121,23 +104,21 @@ export default function Footer() {
             <p className="site-footer-social-label">Follow us</p>
             <div className="site-footer-social">
               {socialLinks.map((social) => (
-                <motion.a
+                <a
                   key={social.id}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.label}
                   className={`site-footer-social-btn site-footer-social-btn--${social.variant}`}
-                  whileHover={{ y: -4, scale: 1.08 }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   <SocialIcon variant={social.variant} />
-                </motion.a>
+                </a>
               ))}
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div className="site-footer-col" variants={fadeUp} transition={revealTransition(0.08)}>
+          <div className="site-footer-col">
             <h3 className="site-footer-heading">Quick Links</h3>
             <ul className="site-footer-links">
               {quickLinks.map((link) => (
@@ -148,9 +129,9 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-          </motion.div>
+          </div>
 
-          <motion.div className="site-footer-col" variants={fadeUp} transition={revealTransition(0.16)}>
+          <div className="site-footer-col">
             <h3 className="site-footer-heading">Legal</h3>
             <ul className="site-footer-links">
               {legalLinks.map((link) => (
@@ -161,31 +142,19 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
-        <motion.aside
-          className="site-footer-disclaimer-box"
-          role="note"
-          aria-label="Disclaimer"
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="visible"
-          viewport={scrollViewport}
-          transition={revealTransition(0.2)}
-          whileHover={{ scale: 1.005 }}
-        >
+        <aside className="site-footer-disclaimer-box" role="note" aria-label="Disclaimer">
           <span className="site-footer-disclaimer-label">Disclaimer</span>
           <p className="site-footer-disclaimer-text">{FOOTER_DISCLAIMER}</p>
           <a href="/disclaimer" className="site-footer-disclaimer-link">
             Read full disclaimer
           </a>
-        </motion.aside>
+        </aside>
 
         <div className="site-footer-bottom">
-          <p className="site-footer-copy">
-            © {year} AltılıBahis.com. All rights reserved.
-          </p>
+          <p className="site-footer-copy">© {year} AltılıBahis.com. All rights reserved.</p>
         </div>
       </div>
     </footer>

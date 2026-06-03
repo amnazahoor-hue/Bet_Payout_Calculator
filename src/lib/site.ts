@@ -53,4 +53,9 @@ export const defaultMetadata: Metadata = {
 };
 
 export const heroVideoSrc = "/images/horse-sprite.mp4";
+export const heroVideoSrcMobile = "/images/horse-sprite-mobile.mp4";
 export const faqVideoSrc = "/images/horse-sprite-3.mp4";
+export const faqVideoSrcMobile = "/images/horse-sprite-3-mobile.mp4";
+export const calculatorImageSrc = "/images/calculator-bg.jpg";
+export const howItWorksImageSrc = "/images/how-it-works-horse.jpg";
+export const horseSpriteSvgSrc = "/images/horse-sprite.svg";

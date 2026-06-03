@@ -1,11 +1,11 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import Reveal from "@/components/ui/Reveal";
 import AnimatedNumber from "@/components/ui/AnimatedNumber";
-import CalculatorExportPanel from "@/components/sections/CalculatorExportPanel";
 import {
   calculatePayout,
   formatEnglishNumber,
@@ -14,8 +14,14 @@ import {
   parseEnglishNumber,
   type PayoutResult,
 } from "@/lib/calculator";
+import { calculatorImageSrc } from "@/lib/site";
 
-const CALCULATOR_IMAGE = "/images/calculator-bg.jpg";
+const CalculatorExportPanel = dynamic(
+  () => import("@/components/sections/CalculatorExportPanel"),
+  { ssr: false }
+);
+
+const CALCULATOR_IMAGE = calculatorImageSrc;
 
 type FieldErrors = {
   prizePool?: string;
@@ -69,7 +75,7 @@ export default function ToolSection() {
     });
   };
 
-  const handleCalculate = async () => {
+  const handleCalculate = () => {
     const validationErrors = validate();
     setErrors(validationErrors);
     setResult(null);
@@ -77,7 +83,6 @@ export default function ToolSection() {
     if (Object.keys(validationErrors).length > 0) return;
 
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 650));
 
     const pool = parseEnglishNumber(prizePoolInput);
     const winners = Math.floor(parseEnglishNumber(winnersInput));
@@ -214,8 +219,8 @@ export default function ToolSection() {
                 width={800}
                 height={1000}
                 sizes="(max-width: 1024px) 50vw, 560px"
-                quality={75}
-                loading="lazy"
+                quality={80}
+                priority
                 className="tool-section-image"
               />
             </div>

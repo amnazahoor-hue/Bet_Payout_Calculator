@@ -2,30 +2,37 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const LOOP_EPSILON = 0.12;
-
 type LazyVideoProps = {
   src: string;
   className?: string;
   preload?: "none" | "metadata" | "auto";
   ariaHidden?: boolean;
   playbackRate?: number;
-  seamlessLoop?: boolean;
+  loop?: boolean;
+  eager?: boolean;
+  rootMargin?: string;
 };
 
 export default function LazyVideo({
   src,
   className,
-  preload = "none",
+  preload = "metadata",
   ariaHidden = true,
   playbackRate = 1,
-  seamlessLoop = false,
+  loop = true,
+  eager = false,
+  rootMargin = "320px 0px",
 }: LazyVideoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [shouldLoad, setShouldLoad] = useState(false);
+  const [shouldLoad, setShouldLoad] = useState(eager);
 
   useEffect(() => {
+    if (eager) {
+      setShouldLoad(true);
+      return;
+    }
+
     const node = containerRef.current;
     if (!node) return;
 
@@ -36,12 +43,12 @@ export default function LazyVideo({
           observer.disconnect();
         }
       },
-      { rootMargin: "240px 0px", threshold: 0.01 }
+      { rootMargin, threshold: 0.01 }
     );
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, []);
+  }, [eager, rootMargin]);
 
   const applyPlayback = useCallback(
     (video: HTMLVideoElement) => {
@@ -52,51 +59,27 @@ export default function LazyVideo({
     [playbackRate]
   );
 
-  const seekToLoopStart = useCallback((video: HTMLVideoElement) => {
-    if (video.readyState >= 1) {
-      video.currentTime = 0.001;
-    }
-  }, []);
-
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !shouldLoad) return;
 
     applyPlayback(video);
-
-    const onLoaded = () => applyPlayback(video);
-
-    const onTimeUpdate = () => {
-      if (!seamlessLoop || !Number.isFinite(video.duration) || video.duration <= 0) return;
-      if (video.currentTime >= video.duration - LOOP_EPSILON) {
-        seekToLoopStart(video);
-      }
-    };
-
-    const onEnded = () => {
-      if (!seamlessLoop) return;
-      seekToLoopStart(video);
-      applyPlayback(video);
-    };
-
-    video.addEventListener("loadeddata", onLoaded);
-    video.addEventListener("timeupdate", onTimeUpdate);
-    video.addEventListener("ended", onEnded);
+    const onCanPlay = () => applyPlayback(video);
+    video.addEventListener("canplay", onCanPlay, { once: true });
 
     return () => {
-      video.removeEventListener("loadeddata", onLoaded);
-      video.removeEventListener("timeupdate", onTimeUpdate);
-      video.removeEventListener("ended", onEnded);
+      video.removeEventListener("canplay", onCanPlay);
     };
-  }, [shouldLoad, seamlessLoop, applyPlayback, seekToLoopStart]);
+  }, [shouldLoad, src, applyPlayback]);
 
   return (
     <div ref={containerRef} className={className}>
       {shouldLoad ? (
         <video
           ref={videoRef}
+          key={src}
           autoPlay
-          loop={!seamlessLoop}
+          loop={loop}
           muted
           playsInline
           controls={false}
